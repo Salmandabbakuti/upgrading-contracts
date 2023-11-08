@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract Lock is Initializable, UUPSUpgradeable, OwnableUpgradeable {
+contract LockUpdated is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     uint public unlockTime;
 
     event Withdrawal(uint amount, uint when);
@@ -25,11 +25,12 @@ contract Lock is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function withdraw() public {
-        // Here, anyone can call this function and withdraw the funds from contract
-        // This is a vulnerability, So we will be fixing by upgrading the contract
+    function withdraw() public onlyOwner {
+        // We have fixed the vulnerability by making this function with onlyOwner modifier
+        // Also explcitly mentioned the owner address in transfer call
         require(block.timestamp >= unlockTime, "You can't withdraw yet");
-        payable(msg.sender).transfer(address(this).balance);
+        address owner = owner();
+        payable(owner).transfer(address(this).balance);
         emit Withdrawal(address(this).balance, block.timestamp);
     }
 }
